@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  brainyboat-server:
+    build: "."
+    restart: "always"
+
+    environment:
+      - DATABASE=postgresql+asyncpg://${DATABASE_USER}:${DATABASE_PASSWORD}@brainyboat-database:5432/${DATABASE_NAME}
+      - SECRET=${SECRET}
+      - PORT=${PORT}
+      - ROOT_PATH=${ROOT_PATH}
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - brainyboat-database 
+
+  brainyboat-database:
+    image: "postgres:bullseye"
+    restart: "always"
+
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    volumes:
+      - brainyboat-database:/var/lib/postgresql/data
+
+volumes:
+  brainyboat-database:

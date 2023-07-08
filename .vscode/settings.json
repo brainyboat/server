@@ -1,0 +1,17 @@
+{
+  "cSpell.words": [
+    "fastapi",
+    "imai",
+    "ondelete",
+    "pydantic",
+    "sessionmaker",
+    "sqlalchemy",
+    "timespec",
+    "uvicorn",
+    "websockets"
+  ],
+  "files.exclude": {
+    "**/.mypy_cache": true,
+    "**/.venv": true
+  }
+}

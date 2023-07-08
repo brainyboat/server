@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "brainyboat-backend"
+version = "0.0.0"
+description = "BrainyBoat backend server"
+authors = ["Igor <me@igorek.dev>"]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+fastapi = "^0.99.1"
+pydantic = "^1"
+websockets = "^11.0.3"
+uvicorn = "^0.22.0"
+
+sqlalchemy = {extras = ["mypy"], version = "^2.0.17"}
+asyncpg = "^0.27.0"
+pyjwt = "^2.7.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.4.1"
+isort = "^5.12.0"
+black = "^23.3.0"
+
+
+[tool.mypy]
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_untyped_calls = true
+
+[tool.isort]
+profile = "black"
+filter_files = true
+skip = ["__init__.py"]
