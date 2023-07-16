@@ -3,6 +3,7 @@ name = "brainyboat-backend"
 version = "0.0.0"
 description = "BrainyBoat backend server"
 authors = ["Igor <me@igorek.dev>"]
+license = "GPL-3.0-only"
 readme = "README.md"
 
 
@@ -14,7 +15,7 @@ pydantic = "^1"
 websockets = "^11.0.3"
 uvicorn = "^0.22.0"
 
-sqlalchemy = {extras = ["mypy"], version = "^2.0.17"}
+sqlalchemy = { extras = ["mypy"], version = "^2.0.17" }
 asyncpg = "^0.27.0"
 pyjwt = "^2.7.0"
 

@@ -17,7 +17,7 @@ from database.telemetry import Telemetry
 from endpoints import dependencies
 
 router = APIRouter(prefix="/ship", tags=["Ships"])
-course_pool: dict[int, Queue[list[tuple[float, float]] | None]] = {}
+course_pool: dict[int, set[Queue[list[tuple[float, float]] | None]]] = {}
 
 
 @router.get("/get/id")
@@ -133,7 +133,8 @@ async def update_course(
         await session.execute(delete(Telemetry).where(Telemetry.ship_id == id))
 
         if ship.id in course_pool:
-            await course_pool[ship.id].put(course)
+            for queue in course_pool[ship.id]:
+                await queue.put(course)
 
         return models.ship.Ship.from_orm(ship)
 
@@ -193,8 +194,8 @@ async def listen_course(
 ) -> None:
     await websocket.accept()
 
-    if id in course_pool:
-        raise WebSocketException(1003, "This ship already connected")
+    if id not in course_pool:
+        course_pool[id] = set()
 
     async with database.sessions.begin() as session:
         if (
@@ -208,15 +209,17 @@ async def listen_course(
             )
             is None
         ):
-            raise WebSocketException(1003, "Ship not found")
+            raise WebSocketException(1007, "Ship not found")
 
     queue: Queue[list[tuple[float, float]] | None] = Queue()
-    course_pool[id] = queue
+    course_pool[id].add(queue)
 
     try:
         while True:
             course = await queue.get()
             await websocket.send_text(json.dumps(course))
     except WebSocketDisconnect:
-        course_pool.pop(id)
+        course_pool[id].remove(queue)
+        if len(course_pool[id]) == 0:
+            course_pool.pop(id)
         await websocket.close()

@@ -1,4 +1,5 @@
 from asyncio import Queue
+from datetime import UTC
 
 from fastapi import (
     APIRouter,
@@ -72,7 +73,7 @@ async def add(
 
         telemetry = Telemetry(
             ship_id=telemetry_model.ship_id,
-            datetime=telemetry_model.datetime,
+            datetime=telemetry_model.datetime.astimezone(UTC).replace(tzinfo=None),
             longitude=telemetry_model.longitude,
             latitude=telemetry_model.latitude,
             angle=telemetry_model.angle,
@@ -93,8 +94,8 @@ async def add(
         return models.telemetry.Telemetry.from_orm(telemetry)
 
 
-@router.websocket("/listen/telemetry")
-async def listen_telemetry(
+@router.websocket("/listen")
+async def listen(
     websocket: WebSocket,
     user: dependencies.QueryUser,
     id: int,
@@ -116,7 +117,7 @@ async def listen_telemetry(
             )
             is None
         ):
-            raise WebSocketException(1003, "Ship not found")
+            raise WebSocketException(1007, "Ship not found")
 
     queue: Queue[models.telemetry.Telemetry] = Queue()
     telemetry_pool[id].add(queue)
