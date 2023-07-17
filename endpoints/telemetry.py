@@ -43,10 +43,16 @@ async def get_by_id(
 
 
 @router.get("/get/my")
-async def get_my(user: dependencies.HeaderUser) -> list[models.telemetry.Telemetry]:
+async def get_my(
+    user: dependencies.HeaderUser,
+    desc: bool = True,
+) -> list[models.telemetry.Telemetry]:
     async with database.sessions.begin() as session:
         telemetry = await session.scalars(
-            select(Telemetry).join(Ship).where(Ship.owner_id == user.id)
+            select(Telemetry)
+            .join(Ship)
+            .where(Ship.owner_id == user.id)
+            .order_by(Telemetry.id.desc() if desc else Telemetry.id)
         )
 
         return [models.telemetry.Telemetry.from_orm(t) for t in telemetry]

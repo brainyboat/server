@@ -67,6 +67,7 @@ async def get_my(user: dependencies.HeaderUser) -> list[models.ship.Ship]:
 async def get_telemetry(
     user: dependencies.HeaderUser,
     id: int,
+    desc: bool = True,
 ) -> list[models.telemetry.Telemetry]:
     async with database.sessions.begin() as session:
         telemetry = await session.scalars(
@@ -78,6 +79,7 @@ async def get_telemetry(
                     Ship.owner_id == user.id,
                 )
             )
+            .order_by(Telemetry.id.desc() if desc else Telemetry.id)
         )
 
         return [models.telemetry.Telemetry.from_orm(t) for t in telemetry]
