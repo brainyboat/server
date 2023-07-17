@@ -130,7 +130,6 @@ async def update_course(
 
         ship.course = course
         await session.flush()
-        await session.execute(delete(Telemetry).where(Telemetry.ship_id == id))
 
         if ship.id in course_pool:
             for queue in course_pool[ship.id]:
@@ -184,6 +183,30 @@ async def delete_ship(user: dependencies.HeaderUser, id: int) -> models.ship.Shi
 
         await session.delete(ship)
         return models.ship.Ship.from_orm(ship)
+
+
+@router.delete("/delete/telemetry")
+async def delete_telemetry(
+    user: dependencies.HeaderUser, id: int
+) -> list[models.telemetry.Telemetry]:
+    async with database.sessions.begin() as session:
+        ship = await session.scalar(
+            select(Ship).where(
+                and_(
+                    Ship.id == id,
+                    Ship.owner_id == user.id,
+                )
+            )
+        )
+
+        if ship is None:
+            raise HTTPException(404, "Ship not found")
+
+        telemetry = await session.scalars(
+            delete(Telemetry).where(Telemetry.ship_id == id).returning(Telemetry)
+        )
+
+        return [models.telemetry.Telemetry.from_orm(t) for t in telemetry]
 
 
 @router.websocket("/listen/course")
